@@ -1,5 +1,5 @@
 resource "aws_batch_job_definition" "batch_job_definition" {
-  name = "${var.name}-${var.app_name}-job-definition"
+  name = "${local.full_app_name}-job-definition"
   type = "container"
 
   platform_capabilities = [
@@ -7,12 +7,12 @@ resource "aws_batch_job_definition" "batch_job_definition" {
   ]
 
   timeout {
-    attempt_duration_seconds = 7200
+    attempt_duration_seconds = var.container_properties.job_timeout
   }
 
   container_properties = jsonencode({
     command = ["Ref::instruction_file"]
-    image   = var.app_image
+    image   = var.container_properties.app_image
 
     fargatePlatformConfiguration = {
       platformVersion = "LATEST"
@@ -21,30 +21,25 @@ resource "aws_batch_job_definition" "batch_job_definition" {
     resourceRequirements = [
       {
         type  = "VCPU"
-        value = var.vcpu
+        value = var.hardware_details.vcpu
       },
       {
         type  = "MEMORY"
-        value = var.memory
+        value = var.hardware_details.memory
       }
     ]
 
     runtimePlatform = {
       operatingSystemFamily = "LINUX",
-      cpuArchitecture = var.cpu_architecture
+      cpuArchitecture = var.hardware_details.cpu_architecture
     }
 
     logConfiguration = {
       logDriver = "awslogs"
     }
 
-    ENVIRONMENT = [{
-      name = "ENVIRONMENT",
-      value = "prod"
-      }, {
-      name = "AWS_DEFAULT_REGION",
-      value = var.aws_region
-    }]
+    environment: var.env_vars
+    secrets: var.secrets.secret_values
 
     networkConfiguration = {
       assignPublicIp = "ENABLED"

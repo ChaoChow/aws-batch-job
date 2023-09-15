@@ -2,52 +2,66 @@ variable "name" {
   description = "Prefix to add before each resource."
 }
 
-variable "app_image" {
-  description = "The name of the docker image to deploy"
-}
-
-variable "aws_region" {
-  description = "AWS region to run the batch job in"
-}
-
-variable "app_name" {
-  description = "Unique name of your application. Batch job name will have '<var.name>' as a prefix and '' as a suffix"
-}
-
 # AWS BATCH JOB DEFINITION
 
-variable "job_timeout" {
-  description = "The length of time the batch job is allowed to run before timing out and being killed"
+variable "container_properties" {
+  description = "Collection of properties used by the batch_job_definition container_properties property"
+  type = object({
+    app_name = string
+    app_region = string
+    app_image = string
+    job_timeout = number
+  })
 }
 
-variable "vcpu" {
-  description = "Amount of CPUs to allocate to the fargate container running the job"
+variable "hardware_details" {
+  description = "Details relating to the physical hardware of the server this job will be running on. CPU must be in increments of 0.5. memory must be power of 2 numbers, cpu_architecture can be can either ARM64 or X86_64"
+  type = object({
+    vcpu = string
+    memory = string
+    cpu_architecture = string
+  })
+  default = {
+    vcpu = "0.5"
+    memory = "1024"
+    cpu_architecture = "ARM64"
+  }
 }
 
-variable "memory" {
-  description = "Amount of memory to allocate to the fargate container running the job"
+variable "secrets" {
+  description = "Contains values used to configure the adding of secrets to the ecs task"
+  type = object({
+    secrets_kms_key_id = string
+    secret_values     = list(object({
+      name      = string
+      valueFrom = string
+    }))
+  })
+  default = {
+    secrets_kms_key_id = null
+    secret_values = []
+  }
 }
 
-variable "cpu_architecture" {
-  description = "CPU instruction set for the container, can either be ARM64 or X86_64"
+variable "env_vars" {
+  description = "Contains any environment variables you would like to inject into the ecs container"
+  type = list(object({
+    name = string
+    value = string
+  }))
+  default = []
 }
 
-# BUCKET NAMES
+# BUCKET ACCESS
 
-variable "instruction_bucket_name" {
-  description = "Name of the s3 bucket that will hold the instruction files. Prefix will be '<var.name>' suffix will be '-instructions'"
-}
-
-variable "run_report_bucket_name" {
-  description = "Name of the s3 bucket that will hold the run report files. Prefix will be '<var.name>' suffix will be '-run-reports'"
-}
-
-variable "output_bucket_names" {
+variable "read_only_bucket_arns" {
+  description = "Arns of s3 buckets batch job will need READ ONLY access to."
   type = list(string)
-  description = "Names of the s3 buckets that will hold the output files. Prefix will be '<var.name>' no suffix will be added"
+  default = []
 }
 
-variable "additional_ro_bucket_arns" {
+variable "read_write_bucket_arns" {
+  description = "Arns of s3 buckets batch job will need READ and WRITE access to."
   type = list(string)
-  description = "ARNs of additional s3 buckets that your batch job will need read only access to."
+  default = []
 }
