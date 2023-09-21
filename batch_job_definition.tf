@@ -1,4 +1,6 @@
 resource "aws_batch_job_definition" "batch_job_definition" {
+  count = local.should_create_definition ? 1 : 0
+
   name = "${local.full_app_name}-job-definition"
   type = "container"
 
@@ -31,21 +33,21 @@ resource "aws_batch_job_definition" "batch_job_definition" {
 
     runtimePlatform = {
       operatingSystemFamily = "LINUX",
-      cpuArchitecture = var.hardware_details.cpu_architecture
+      cpuArchitecture       = var.hardware_details.cpu_architecture
     }
 
     logConfiguration = {
       logDriver = "awslogs"
     }
 
-    environment: var.env_vars
-    secrets: var.secrets.secret_values
+    environment : var.env_vars
+    secrets : var.secrets.secret_values
 
     networkConfiguration = {
       assignPublicIp = "ENABLED"
     }
 
     executionRoleArn = aws_iam_role.batch_job_role.arn
-    jobRoleArn = aws_iam_role.batch_job_role.arn
+    jobRoleArn       = aws_iam_role.batch_job_role.arn
   })
 }
