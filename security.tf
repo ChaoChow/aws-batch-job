@@ -60,10 +60,18 @@ data "aws_iam_policy_document" "read_write_s3_bucket_policy" {
     sid    = "OutputBatchS3BucketAccess"
     effect = "Allow"
     actions = [
-      "s3:PutObject",
+      "s3:CopyObject",
+      "s3:DeleteObject",
+      "s3:DeleteObjects",
+      "s3:DeleteObjectTagging",
       "s3:GetObject",
-      "s3:ListBucket",
-      "s3:DeleteObject"
+      "s3:GetObjectTagging",
+      "s3:HeadObject",
+      "s3:ListObjects",
+      "s3:ListObjectsV2",
+      "s3:ListObjectVersions",
+      "s3:PutObject",
+      "s3:PutObjectTagging"
     ]
     resources = concat(
       [for rw_bucket_arn in var.read_write_bucket_arns : rw_bucket_arn],
@@ -80,7 +88,10 @@ data "aws_iam_policy_document" "read_only_s3_bucket_policy" {
     effect = "Allow"
     actions = [
       "s3:GetObject",
-      "s3:ListBucket"
+      "s3:GetObjectTagging",
+      "s3:HeadObject",
+      "s3:ListObjects",
+      "s3:ListObjectsV2",
     ]
     resources = concat(
       [for ro_bucket_arn in var.read_only_bucket_arns : ro_bucket_arn],
