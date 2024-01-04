@@ -67,6 +67,7 @@ data "aws_iam_policy_document" "read_write_s3_bucket_policy" {
       "s3:GetObject",
       "s3:GetObjectTagging",
       "s3:HeadObject",
+      "s3:ListBucket",
       "s3:ListObjects",
       "s3:ListObjectsV2",
       "s3:ListObjectVersions",
@@ -90,6 +91,7 @@ data "aws_iam_policy_document" "read_only_s3_bucket_policy" {
       "s3:GetObject",
       "s3:GetObjectTagging",
       "s3:HeadObject",
+      "s3:ListBucket",
       "s3:ListObjects",
       "s3:ListObjectsV2",
     ]
